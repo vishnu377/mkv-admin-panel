@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Vishtech Cabs</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/bootstrap-5.3.8-dist/css/bootstrap.min.css">
+     <link rel="stylesheet" href="css/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js">
+
+    
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Custom CSS (consider a separate admin.css if styles deviate much) -->
@@ -525,68 +529,7 @@
                     </div>
                 </div>
 
-                <!-- Manage Mouzas Tab -->
-                <div class="tab-pane fade" id="manageMouzas" role="tabpanel">
-                    <h3 class="mb-4 fw-bold text-dark">Manage Mouzas / Localities</h3>
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <div class="card p-4">
-                                <h5 class="mb-3">Add New Mouza</h5>
-                                <form>
-                                    <div class="mb-3">
-                                        <label for="mouzaName" class="form-label">Mouza Name</label>
-                                        <input type="text" class="form-control" id="mouzaName" placeholder="e.g., Cyber City Mouza" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="mouzaCity" class="form-label">City</label>
-                                        <input type="text" class="form-control" id="mouzaCity" placeholder="e.g., Gurgaon" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="mouzaCoordinates" class="form-label">Coordinates (Lat, Lng)</label>
-                                        <input type="text" class="form-control" id="mouzaCoordinates" placeholder="e.g., 28.4900, 77.0870">
-                                        <small class="text-muted">For map plotting and radius calculation.</small>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary rounded-pill"><i class="fas fa-plus-circle me-2"></i>Add Mouza</button>
-                                </form>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-4">
-                            <h5 class="mb-3">Existing Mouzas</h5>
-                            <div class="table-responsive">
-                                <table class="table table-striped table-hover align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Name</th>
-                                            <th>City</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>M001</td>
-                                            <td>Cyber City</td>
-                                            <td>Gurgaon</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-warning me-2"><i class="fas fa-edit"></i></button>
-                                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>M002</td>
-                                            <td>Green Park</td>
-                                            <td>Delhi</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-warning me-2"><i class="fas fa-edit"></i></button>
-                                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+               
 
                 <!-- Analytics Dashboard Tab -->
                 <div class="tab-pane fade" id="analytics" role="tabpanel">
@@ -759,7 +702,7 @@
     </div>
 
     <!-- Bootstrap JS Bundle (Popper included) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <!-- Custom JavaScript -->
     <script src="script.js"></script>
 </body>
