@@ -1,0 +1,313 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MKV Gramin Admin - Full Workflow</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        
+        /* Custom Card & Table Styling */
+        .card-header-custom { background-color: #0d6efd; color: white; font-weight: 600; padding: 15px; border-radius: 10px 10px 0 0; }
+        .card { border: none; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .btn-primary { background-color: #0d6efd; border: none; }
+        .badge-parcel { background-color: #ffc107; color: #000; }
+        .badge-ride { background-color: #0dcaf0; color: #000; }
+        
+        /* 1. PHOTO MODAL STYLING */
+        .parcel-img-preview { width: 100%; height: auto; border-radius: 8px; border: 2px solid #eee; }
+        
+        /* 2. MAP MODAL STYLING (Check Nearby Drivers) */
+        .map-container {
+            height: 350px;
+            background-color: #e9ecef;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Google_Maps_Logo_2020.svg/1024px-Google_Maps_Logo_2020.svg.png'); /* Fallback placeholder */
+            background-size: cover;
+            background-position: center;
+        }
+        /* Fake Map Overlay for Demo */
+        .map-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.6); }
+        
+        /* Driver Pins on Map */
+        .driver-pin {
+            position: absolute;
+            width: 40px; height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid #0d6efd;
+        }
+        .driver-pin:hover { transform: scale(1.2); z-index: 10; background: #0d6efd; color: white; }
+        .driver-pin.busy { border-color: #dc3545; color: #dc3545; } 
+
+        /* Driver List Item */
+        .driver-list-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px; border-bottom: 1px solid #eee; cursor: pointer;
+        }
+        .driver-list-item:hover { background-color: #f8f9fa; }
+        
+        /* 3. SUCCESS ALERT */
+        .success-overlay {
+            position: fixed; top: 20px; right: 20px; z-index: 9999;
+            display: none; /* Hidden by default */
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    
+    <!-- MAIN SCREEN: INCOMING REQUESTS TABLE -->
+    <h4 class="mb-4 text-secondary">Admin Dashboard</h4>
+    
+    <div class="card">
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-list"></i> Incoming Requests Queue</span>
+            <span class="badge bg-light text-primary">2 Pending</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>User Details</th>
+                        <th>Type</th>
+                        <th>Route</th>
+                        <th>Reference</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>12 Nov<br><small class="text-muted">10:30 AM</small></td>
+                        <td><strong>Amit Kumar</strong><br><small>+91 9876543210</small></td>
+                        <td><span class="badge badge-parcel">Parcel</span></td>
+                        <td><small class="text-success">Delhi</small> &rarr; <small class="text-danger">Noida</small></td>
+                        <!-- BUTTON 1: VIEW PHOTO -->
+                        <td>
+                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#photoModal">
+                                <i class="fas fa-image"></i> View Photo
+                            </button>
+                        </td>
+                        <!-- BUTTON 2: PROCESS (Opens Main Modal) -->
+                        <td>
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#processModal">
+                                Process <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN 1: VIEW PHOTO MODAL (Popup)         -->
+<!-- ========================================== -->
+<div class="modal fade" id="photoModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Parcel Reference Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center bg-light">
+                <!-- Placeholder Image -->
+                <img src="https://cdn-icons-png.flaticon.com/512/679/679720.png" class="parcel-img-preview mb-3" style="max-width: 150px;">
+                <p class="text-muted">Uploaded by User: Amit Kumar</p>
+                <p class="small">Description: Important Documents box, weight approx 2kg.</p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-outline-primary"><i class="fas fa-download"></i> Download</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN 2: MAIN PROCESS MODAL               -->
+<!-- ========================================== -->
+<div class="modal fade" id="processModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title text-primary">Process Request #REQ-2024001</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Step 1 -->
+                <h6 class="text-muted text-uppercase small fw-bold mb-2">Step 1: Communication</h6>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <!-- This simulates calling -->
+                        <a href="tel:9876543210" class="btn btn-success w-100 py-2">
+                            <i class="fas fa-phone-alt me-2"></i> Call User Now
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- BUTTON: CHECK NEARBY DRIVERS -->
+                        <button class="btn btn-outline-primary w-100 py-2" data-bs-toggle="modal" data-bs-target="#mapModal">
+                            <i class="fas fa-map-marked-alt me-2"></i> Check Nearby Drivers
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <h6 class="text-muted text-uppercase small fw-bold mb-2">Step 2: Pricing & Assign</h6>
+                <div class="p-3 border rounded bg-light mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small">Price User Pays (₹)</label>
+                            <input type="number" class="form-control border-success" value="500">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">Price Driver Gets (₹)</label>
+                            <input type="number" class="form-control border-danger" value="400">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small">Select Driver</label>
+                            <select class="form-select" id="driverSelect">
+                                <option>Select a driver...</option>
+                                <option selected>Rajesh K (Bike) - 2.5km away</option>
+                                <option>Suresh (Auto) - 5km away</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <!-- BUTTON: ASSIGN JOB (Triggers Success) -->
+                <button type="button" class="btn btn-primary px-4" onclick="assignJob()">
+                    <i class="fas fa-paper-plane me-2"></i> Assign Driver & Send Job
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SCREEN 3: MAP & DRIVERS MODAL (The Map)    -->
+<!-- ========================================== -->
+<div class="modal fade" id="mapModal" tabindex="-1">
+    <div class="modal-dialog modal-xl"> <!-- Extra Large Modal -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nearby Drivers (Live Map)</h5>
+                <button type="button" class="btn-close" data-bs-toggle="modal" data-bs-target="#processModal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="row g-0">
+                    <!-- Left Side: Driver List -->
+                    <div class="col-md-4 border-end" style="max-height: 400px; overflow-y: auto;">
+                        <div class="p-3 bg-light border-bottom"><small class="text-muted">3 Drivers Found</small></div>
+                        
+                        <div class="driver-list-item" onclick="selectDriver('Rajesh K')">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary text-white rounded-circle me-2" style="width:35px;height:35px;display:flex;align-items:center;justify-content:center;">R</div>
+                                <div>
+                                    <strong>Rajesh K</strong> <span class="badge bg-success" style="font-size:10px">Bike</span><br>
+                                    <small class="text-muted">2.5 km away • 4.8 ⭐</small>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary">Select</button>
+                        </div>
+
+                        <div class="driver-list-item" onclick="selectDriver('Suresh Auto')">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-warning text-dark rounded-circle me-2" style="width:35px;height:35px;display:flex;align-items:center;justify-content:center;">S</div>
+                                <div>
+                                    <strong>Suresh</strong> <span class="badge bg-warning text-dark" style="font-size:10px">Auto</span><br>
+                                    <small class="text-muted">5.0 km away • 4.5 ⭐</small>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary">Select</button>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Visual Map -->
+                    <div class="col-md-8">
+                        <div class="map-container">
+                            <div class="map-overlay"></div>
+                            <!-- Simulated Pins (You will replace this with Google Maps API later) -->
+                            <div class="driver-pin" style="top: 40%; left: 30%;" title="Rajesh K"><i class="fas fa-motorcycle"></i></div>
+                            <div class="driver-pin" style="top: 60%; left: 70%; border-color: orange; color: orange;" title="Suresh"><i class="fas fa-shuttle-van"></i></div>
+                            <div class="position-absolute text-center w-100" style="top: 45%;">
+                                <span class="badge bg-dark shadow"> <i class="fas fa-map-pin"></i> Pickup Location </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#processModal">Back to Assign</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SUCCESS TOAST (Feedback)                   -->
+<!-- ========================================== -->
+<div class="success-overlay card p-3 shadow" id="successToast">
+    <div class="d-flex align-items-center text-success">
+        <i class="fas fa-check-circle fa-2x me-3"></i>
+        <div>
+            <h6 class="m-0 fw-bold">Job Assigned Successfully!</h6>
+            <small class="text-muted">Driver Rajesh K has been notified.</small>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Function to Simulate Assigning Job
+    function assignJob() {
+        // 1. Close the modal
+        var myModalEl = document.getElementById('processModal');
+        var modal = bootstrap.Modal.getInstance(myModalEl);
+        modal.hide();
+
+        // 2. Show Success Toast
+        var toast = document.getElementById('successToast');
+        toast.style.display = 'block';
+
+        // 3. Hide Toast after 3 seconds
+        setTimeout(function() {
+            toast.style.display = 'none';
+        }, 4000);
+    }
+
+    // Function when Driver is selected from Map List
+    function selectDriver(name) {
+        alert(name + " selected! Going back to pricing...");
+        // Logic to close map and open process modal would go here in real app
+        var mapModalEl = document.getElementById('mapModal');
+        var mapModal = bootstrap.Modal.getInstance(mapModalEl);
+        mapModal.hide();
+        
+        var processModal = new bootstrap.Modal(document.getElementById('processModal'));
+        processModal.show();
+    }
+</script>
+
+</body>
+</html>
